@@ -1,0 +1,19 @@
+{
+  "name": "rollup-text",
+  "version": "1.0.0",
+  "description": "A customizable web component that animates text with smooth roll-up effects using CSS and JavaScript.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Web-component",
+    "animation",
+    "css",
+    "javascript",
+    "text",
+    "rollup"
+  ],
+  "author": "Samir Yangua",
+  "license": "MIT"
+}

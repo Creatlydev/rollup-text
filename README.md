@@ -66,7 +66,6 @@ Puedes ajustar los estilos del componente mediante las siguientes custom propert
 
 - **`--border`**: Borde de las letras.
 
-- **`--color`**: Color del texto.
 
 Nota: La fuente de texto se hereda de los estilos del documento, por lo que puedes ajustar la fuente global de tu proyecto para que se refleje en el componente.
 

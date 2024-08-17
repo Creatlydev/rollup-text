@@ -3,7 +3,7 @@ const loaded = (function () {
     return Promise.resolve()
   } else {
     return new Promise((resolve) => {
-      window.addEventListener('load', resolve)
+      window.addEventListener('DOMContentLoaded', resolve)
     })
   }
 })()
@@ -235,15 +235,20 @@ export class RollupText extends HTMLElement {
         setTimeout(() => animateLetters(index + 1), this.wordInterval)
       )
     }
-
     animateLetters()
   }
 
   createLetterContainers(words) {
+    const cacheKey = `${this.textCase}-${this.animationCurve}`
+    this.content.innerHTML = ''
     // Crea un DocumentFragment para todos los contenedores
     const fragmentLettersContainer = document.createDocumentFragment()
-    this.content.innerHTML = ''
     for (let i = 0; i < (words[0]?.length || 0); i++) {
+      if (lettersContainer[cacheKey]) {
+        this.content.appendChild(lettersContainer[cacheKey].cloneNode(true))
+        continue
+      }
+
       const container = document.createElement('div')
       const fragmentContainer = document.createDocumentFragment()
       container.classList.add('letters')
@@ -257,18 +262,18 @@ export class RollupText extends HTMLElement {
       if (this.animationCurve === 'bezier') {
         const prefixLetters = ['Z', 'Y', 'X', 'W']
         const suffixLetters = ['A', 'B', 'C', 'D']
-        prefixLetters.forEach((letter) =>
+        prefixLetters.forEach((letter) => {
           container.insertAdjacentHTML('afterbegin', `<span>${letter}</span>`)
-        )
-        suffixLetters.forEach((letter) =>
+        })
+        suffixLetters.forEach((letter) => {
           container.insertAdjacentHTML('beforeend', `<span>${letter}</span>`)
-        )
+        })
 
         container.style.transform = 'translateY(-4em)'
       }
 
       fragmentLettersContainer.appendChild(container)
-      lettersContainer[`${this.textCase}-${this.animationCurve}`] = container
+      lettersContainer[cacheKey] = container.cloneNode(true)
     }
     this.content.appendChild(fragmentLettersContainer)
   }

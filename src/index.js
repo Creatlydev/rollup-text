@@ -8,6 +8,10 @@ const loaded = (function () {
   }
 })()
 
+const lettersContainer = {}
+const availableLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+const cachedTransformations = new Map() // Cache global compartido por todas las instancias
+
 export class RollupText extends HTMLElement {
   constructor() {
     super()
@@ -50,8 +54,35 @@ export class RollupText extends HTMLElement {
     `
   }
 
+  getCachedOrComputePosition(fromLetter, toLetter, transformedLetters) {
+    const cacheKey = `${fromLetter}-${toLetter}-${this.animationCurve}`
+    if (cachedTransformations.has(cacheKey)) {
+      return cachedTransformations.get(cacheKey)
+    }
+    const fromPos = transformedLetters.indexOf(fromLetter)
+    let toPos = transformedLetters.indexOf(toLetter)
+
+    // Cálculo de la duración ajustada
+    let adjustedDuration = null
+    if (this.distanceBasedScroll) {
+      const distance = Math.abs(toPos - fromPos)
+      const baseSpeed = parseInt(this.scrollSpeed)
+      adjustedDuration = (baseSpeed / transformedLetters.length) * distance
+    }
+
+    if (this.animationCurve === 'bezier') {
+      toPos += 4 // Ajuste para la animación bezier
+    }
+
+    // Guardamos tanto la posición como la duración ajustada en el cache global
+    const transformationData = { targetPos: toPos, adjustedDuration }
+    cachedTransformations.set(cacheKey, transformationData)
+    return transformationData
+  }
+
   async connectedCallback() {
     await loaded
+    this.content = this.shadowRoot.querySelector('#content')
     this.updateProperties()
     this.startAnimation()
   }
@@ -95,7 +126,12 @@ export class RollupText extends HTMLElement {
   }
 
   get animationCurve() {
-    return this.getAttribute('animation-curve') || 'linear'
+    const animationCurve = this.getAttribute('animation-curve') || ''
+    return (
+      animationCurve ||
+      ['bezier', 'linear'].includes(animationCurve.toLowerCase()) ||
+      'linear'
+    )
   }
 
   set animationCurve(value) {
@@ -134,6 +170,12 @@ export class RollupText extends HTMLElement {
     return this.hasAttribute('distance-based-scroll')
   }
 
+  get transformedLetters() {
+    return this.textCase === 'lowercase'
+      ? availableLetters.toLowerCase()
+      : availableLetters.toUpperCase()
+  }
+
   updateProperties() {
     const animationCurves = {
       bezier: 'cubic-bezier(.87,-.8, .03, 1.5)',
@@ -150,7 +192,6 @@ export class RollupText extends HTMLElement {
   }
 
   startAnimation() {
-    const content = this.shadowRoot.querySelector('#content')
     const words = this.words.length
       ? this.words.map((word) =>
           this.textCase === 'uppercase'
@@ -158,41 +199,13 @@ export class RollupText extends HTMLElement {
             : word.toLowerCase()
         )
       : []
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
     const transformText = (type) =>
-      type === 'lowercase' ? alphabet.toLowerCase() : alphabet.toUpperCase()
+      type === 'lowercase'
+        ? availableLetters.toLowerCase()
+        : availableLetters.toUpperCase()
 
-    const alphabetTransformed = transformText(this.textCase)
-
-    const createLetterContainers = () => {
-      content.innerHTML = ''
-      for (let i = 0; i < (words[0]?.length || 0); i++) {
-        const container = document.createElement('div')
-        container.classList.add('letters')
-        alphabetTransformed.split('').forEach((letter) => {
-          const span = document.createElement('span')
-          span.textContent = letter
-          container.appendChild(span)
-        })
-
-        if (this.animationCurve === 'bezier') {
-          const prefixLetters = ['Z', 'Y', 'X', 'W']
-          const suffixLetters = ['A', 'B', 'C', 'D']
-          prefixLetters.forEach((letter) =>
-            container.insertAdjacentHTML('afterbegin', `<span>${letter}</span>`)
-          )
-          suffixLetters.forEach((letter) =>
-            container.insertAdjacentHTML('beforeend', `<span>${letter}</span>`)
-          )
-          container.style.transform = 'translateY(-4em)'
-        }
-
-        content.appendChild(container)
-      }
-    }
-
-    createLetterContainers()
+    this.createLetterContainers(words)
 
     const animateLetters = (index = 0) => {
       if (!words.length || (words.length < 2 && index === 1)) return
@@ -200,21 +213,20 @@ export class RollupText extends HTMLElement {
       const currentWord = words[index % words.length]
       const nextWord = words[(index + 1) % words.length]
       currentWord?.split('').forEach((letter, i) => {
-        const currentPos = alphabetTransformed.indexOf(letter)
-        let targetPos = alphabetTransformed.indexOf(nextWord[i])
-        const distance = Math.abs(targetPos - currentPos)
+        const targetLetter = nextWord[i]
+        const { targetPos, adjustedDuration } = this.getCachedOrComputePosition(
+          letter,
+          targetLetter,
+          this.transformedLetters,
+          this.animationCurve
+        )
 
-        const baseSpeed = parseInt(this.scrollSpeed) || 2000 // en ms
-        const adjustedDuration = this.distanceBasedScroll
-          ? (baseSpeed / alphabetTransformed.length) * distance
-          : baseSpeed
-
-        targetPos += this.animationCurve === 'bezier' ? 4 : 0
-
-        content.querySelector(
-          `.letters:nth-child(${i + 1})`
-        ).style.transitionDuration = `${adjustedDuration}ms`
-        content.querySelector(
+        if (adjustedDuration) {
+          this.content.querySelector(
+            `.letters:nth-child(${i + 1})`
+          ).style.transitionDuration = `${adjustedDuration}ms`
+        }
+        this.content.querySelector(
           `.letters:nth-child(${i + 1})`
         ).style.transform = `translateY(-${targetPos}em)`
       })
@@ -225,6 +237,40 @@ export class RollupText extends HTMLElement {
     }
 
     animateLetters()
+  }
+
+  createLetterContainers(words) {
+    // Crea un DocumentFragment para todos los contenedores
+    const fragmentLettersContainer = document.createDocumentFragment()
+    this.content.innerHTML = ''
+    for (let i = 0; i < (words[0]?.length || 0); i++) {
+      const container = document.createElement('div')
+      const fragmentContainer = document.createDocumentFragment()
+      container.classList.add('letters')
+      this.transformedLetters.split('').forEach((letter) => {
+        const span = document.createElement('span')
+        span.textContent = letter
+        fragmentContainer.appendChild(span)
+      })
+      container.appendChild(fragmentContainer)
+
+      if (this.animationCurve === 'bezier') {
+        const prefixLetters = ['Z', 'Y', 'X', 'W']
+        const suffixLetters = ['A', 'B', 'C', 'D']
+        prefixLetters.forEach((letter) =>
+          container.insertAdjacentHTML('afterbegin', `<span>${letter}</span>`)
+        )
+        suffixLetters.forEach((letter) =>
+          container.insertAdjacentHTML('beforeend', `<span>${letter}</span>`)
+        )
+
+        container.style.transform = 'translateY(-4em)'
+      }
+
+      fragmentLettersContainer.appendChild(container)
+      lettersContainer[`${this.textCase}-${this.animationCurve}`] = container
+    }
+    this.content.appendChild(fragmentLettersContainer)
   }
 }
 

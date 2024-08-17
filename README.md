@@ -1,7 +1,7 @@
 <h1 align="center">RollupText 🌟</h1>
 
 <div align="center">
-  <img src="./public/demo.gif" alt="Demostracion de rollup-text">
+  <img src="https://github.com/Creatlydev/rollup-text/blob/main/public/demo.gif?raw=true" alt="Demostracion de rollup-text">
 </div>
 <br>
 

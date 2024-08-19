@@ -206,10 +206,11 @@ export class RollupText extends HTMLElement {
         ? availableLetters.toLowerCase()
         : availableLetters.toUpperCase()
 
-    this.createLetterContainers(words, longestLength)
+    this.createLetterContainers(longestLength)
 
     const animateLetters = (index = words.length - 1) => {
       if (!words.length || (words.length < 2 && index === 1)) return
+
       const currentWord = words[index % words.length]
       const nextWord = words[(index + 1) % words.length]
 
@@ -222,32 +223,16 @@ export class RollupText extends HTMLElement {
           this.animationCurve
         )
 
-        if (adjustedDuration) {
-          this.content.querySelector(
-            `.letters:nth-child(${i + 1})`
-          ).style.transitionDuration = `${adjustedDuration}ms`
-        }
-        this.content.querySelector(
+        const letterElement = this.content.querySelector(
           `.letters:nth-child(${i + 1})`
-        ).style.transform = `translateY(-${targetPos}em)`
+        )
 
-        if (nextWord[currentWord.length]) {
-          for (let i = currentWord.length; i < nextWord.length; i++) {
-            this.content.querySelector(
-              `.letters:nth-child(${i + 1})`
-            ).style.transform = `translateY(-${
-              this.transformedLetters.indexOf(nextWord[i]) + (this.animationCurve === 'bezier' ? 4 : 0)
-            }em)`
-          }
+        if (adjustedDuration) {
+          letterElement.style.transitionDuration = `${adjustedDuration}ms`
         }
-        if (!nextWord[i] || nextWord.length < longestLength) {
-          const extraLetters = this.content.querySelectorAll(
-            `.letters:nth-child(n+${nextWord.length + 1})`
-          )
-          extraLetters.forEach(
-            (extraLetter) => (extraLetter.style.transform = 'translateY(100%)')
-          )
-        }
+        letterElement.style.transform = `translateY(-${targetPos}em)`
+
+        this.handleWordsVariableLengths(i, currentWord, nextWord, longestLength)
       })
 
       requestAnimationFrame(() =>
@@ -257,7 +242,31 @@ export class RollupText extends HTMLElement {
     animateLetters()
   }
 
-  createLetterContainers(words, longestLength) {
+  handleWordsVariableLengths(i, currentWord, nextWord, longestLength) {
+    // Handle extra letters for the next word
+    if (nextWord[currentWord.length]) {
+      for (let i = currentWord.length; i < nextWord.length; i++) {
+        let indexLetter = this.transformedLetters.indexOf(nextWord[i])
+        indexLetter += this.animationCurve === 'bezier' ? 4 : 0
+        const letterElement = this.content.querySelector(
+          `.letters:nth-child(${i + 1})`
+        )
+        letterElement.style.transform = `translateY(-${indexLetter}em)`
+      }
+    }
+
+    // Hide any extra letters if the next not word[i] or the next word is shorter
+    if (!nextWord[i] || nextWord.length < longestLength) {
+      const extraLetters = this.content.querySelectorAll(
+        `.letters:nth-child(n+${nextWord.length + 1})`
+      )
+      extraLetters.forEach(
+        (extraLetter) => (extraLetter.style.transform = 'translateY(100%)')
+      )
+    }
+  }
+
+  createLetterContainers(longestLength) {
     const cacheKey = `${this.textCase}-${this.animationCurve}`
     this.content.innerHTML = ''
     // Crea un DocumentFragment para todos los contenedores

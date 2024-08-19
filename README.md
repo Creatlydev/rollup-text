@@ -54,21 +54,6 @@ Puedes personalizar el componente utilizando las siguientes atributos:
 
 - **`distance-based-scroll`**: Si se especifica este atributo, el scroll se basará en la distancia entre letras, de lo contrario, se utilizará el valor por defecto.
 
-### Custom Properties
-
-Puedes ajustar los estilos del componente mediante las siguientes custom properties:
-
-- **`--letter-spacing`**: Espaciado entre letras.
-
-- **`--w-letter`**: Ancho de las letras.
-
-- **`--padding`**: Espaciado interno de las letras.
-
-- **`--border`**: Borde de las letras.
-
-
-Nota: La fuente de texto se hereda de los estilos del documento, por lo que puedes ajustar la fuente global de tu proyecto para que se refleje en el componente.
-
 ## Ejemplos de Personalización 🎨
 
 Aquí tienes ejemplos de cómo puedes utilizar diferentes configuraciones:

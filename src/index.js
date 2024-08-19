@@ -15,43 +15,34 @@ const cachedTransformations = new Map() // Cache global compartido por todas las
 export class RollupText extends HTMLElement {
   constructor() {
     super()
-    this.attachShadow({ mode: 'open' })
-    this.shadowRoot.innerHTML = `
-      <style>
-        p, .letters, span {
-          box-sizing: border-box;
-        }
-        :host {
-          display: inline-block;
-        }
-        p {
-          --duration: var(--scroll-speed);
-          --time-function: var(--animation-function);
-          font: inherit;
-          height: 1em;
-          line-height: 1em;
-          color: inherit;
-          overflow: hidden;
-          margin: inherit;
-          display: flex;
-          gap: var(--letter-spacing, 10px);
-        }
-        .letters {
-          text-align: center;
-          display: inline-flex;
-          flex-direction: column;
-          transition: transform var(--duration) var(--time-function);
-        }
-
-        span {
-          width: var(--w-letter, auto);
-          height: 1em;
-          padding: var(--padding, 0);
-          border: var(--border, 1px solid transparent);
-        }
-      </style>
-      <p id="content"></p>
+    const style = `
+      rollup-text {
+        --duration: var(--scroll-speed);
+        --time-function: var(--animation-function);
+        height: 1em;
+        line-height: 1em;
+        overflow: hidden;
+        display: inline-flex;
+      }
+      .letters {
+        text-align: center;
+        display: inline-flex;
+        flex-direction: column;
+        transition: transform var(--duration) var(--time-function);
+      }
+      span {
+        height: 1em;
+      }
     `
+
+    // Inyectar estilos globalmente si no están ya presentes
+    if (!document.querySelector('style[data-rollup-text]')) {
+      const styleElement = document.createElement('style')
+      styleElement.type = 'text/css'
+      styleElement.setAttribute('data-rollup-text', '')
+      styleElement.textContent = style
+      document.head.appendChild(styleElement)
+    }
   }
 
   getCachedOrComputePosition(fromLetter, toLetter, transformedLetters) {
@@ -82,7 +73,6 @@ export class RollupText extends HTMLElement {
 
   async connectedCallback() {
     await loaded
-    this.content = this.shadowRoot.querySelector('#content')
     this.updateProperties()
     this.startAnimation()
   }
@@ -181,11 +171,10 @@ export class RollupText extends HTMLElement {
       bezier: 'cubic-bezier(.87,-.8, .03, 1.5)',
       linear: 'linear',
     }
-    const p = this.shadowRoot.querySelector('p')
 
-    p.style.setProperty('--scroll-speed', this.scrollSpeed)
-    p.style.setProperty('--word-interval', this.wordInterval)
-    p.style.setProperty(
+    this.style.setProperty('--scroll-speed', this.scrollSpeed)
+    this.style.setProperty('--word-interval', this.wordInterval)
+    this.style.setProperty(
       '--animation-function',
       animationCurves[this.animationCurve] || animationCurves.linear
     )
@@ -223,9 +212,7 @@ export class RollupText extends HTMLElement {
           this.animationCurve
         )
 
-        const letterElement = this.content.querySelector(
-          `.letters:nth-child(${i + 1})`
-        )
+        const letterElement = this.querySelector(`.letters:nth-child(${i + 1})`)
 
         if (adjustedDuration) {
           letterElement.style.transitionDuration = `${adjustedDuration}ms`
@@ -248,16 +235,14 @@ export class RollupText extends HTMLElement {
       for (let i = currentWord.length; i < nextWord.length; i++) {
         let indexLetter = this.transformedLetters.indexOf(nextWord[i])
         indexLetter += this.animationCurve === 'bezier' ? 4 : 0
-        const letterElement = this.content.querySelector(
-          `.letters:nth-child(${i + 1})`
-        )
+        const letterElement = this.querySelector(`.letters:nth-child(${i + 1})`)
         letterElement.style.transform = `translateY(-${indexLetter}em)`
       }
     }
 
     // Hide any extra letters if the next not word[i] or the next word is shorter
     if (!nextWord[i] || nextWord.length < longestLength) {
-      const extraLetters = this.content.querySelectorAll(
+      const extraLetters = this.querySelectorAll(
         `.letters:nth-child(n+${nextWord.length + 1})`
       )
       extraLetters.forEach(
@@ -268,12 +253,12 @@ export class RollupText extends HTMLElement {
 
   createLetterContainers(longestLength) {
     const cacheKey = `${this.textCase}-${this.animationCurve}`
-    this.content.innerHTML = ''
+    this.innerHTML = ''
     // Crea un DocumentFragment para todos los contenedores
     const fragmentLettersContainer = document.createDocumentFragment()
     for (let i = 0; i < longestLength; i++) {
       if (lettersContainer[cacheKey]) {
-        this.content.appendChild(lettersContainer[cacheKey].cloneNode(true))
+        this.appendChild(lettersContainer[cacheKey].cloneNode(true))
         continue
       }
 
@@ -303,7 +288,7 @@ export class RollupText extends HTMLElement {
       fragmentLettersContainer.appendChild(container)
       lettersContainer[cacheKey] = container.cloneNode(true)
     }
-    this.content.appendChild(fragmentLettersContainer)
+    this.appendChild(fragmentLettersContainer)
   }
 }
 

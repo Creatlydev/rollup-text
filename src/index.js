@@ -9,7 +9,7 @@ const loaded = (function () {
 })()
 
 const lettersContainer = {}
-const availableLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+const availableLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 const cachedTransformations = new Map() // Cache global compartido por todas las instancias
 
 export class RollupText extends HTMLElement {
@@ -199,19 +199,20 @@ export class RollupText extends HTMLElement {
             : word.toLowerCase()
         )
       : []
+    const longestLength = Math.max(...words?.map((word) => word.length)) || 0
 
     const transformText = (type) =>
       type === 'lowercase'
         ? availableLetters.toLowerCase()
         : availableLetters.toUpperCase()
 
-    this.createLetterContainers(words)
+    this.createLetterContainers(words, longestLength)
 
-    const animateLetters = (index = 0) => {
+    const animateLetters = (index = words.length - 1) => {
       if (!words.length || (words.length < 2 && index === 1)) return
-
       const currentWord = words[index % words.length]
       const nextWord = words[(index + 1) % words.length]
+
       currentWord?.split('').forEach((letter, i) => {
         const targetLetter = nextWord[i]
         const { targetPos, adjustedDuration } = this.getCachedOrComputePosition(
@@ -229,6 +230,24 @@ export class RollupText extends HTMLElement {
         this.content.querySelector(
           `.letters:nth-child(${i + 1})`
         ).style.transform = `translateY(-${targetPos}em)`
+
+        if (nextWord[currentWord.length]) {
+          for (let i = currentWord.length; i < nextWord.length; i++) {
+            this.content.querySelector(
+              `.letters:nth-child(${i + 1})`
+            ).style.transform = `translateY(-${
+              this.transformedLetters.indexOf(nextWord[i]) + (this.animationCurve === 'bezier' ? 4 : 0)
+            }em)`
+          }
+        }
+        if (!nextWord[i] || nextWord.length < longestLength) {
+          const extraLetters = this.content.querySelectorAll(
+            `.letters:nth-child(n+${nextWord.length + 1})`
+          )
+          extraLetters.forEach(
+            (extraLetter) => (extraLetter.style.transform = 'translateY(100%)')
+          )
+        }
       })
 
       requestAnimationFrame(() =>
@@ -238,12 +257,12 @@ export class RollupText extends HTMLElement {
     animateLetters()
   }
 
-  createLetterContainers(words) {
+  createLetterContainers(words, longestLength) {
     const cacheKey = `${this.textCase}-${this.animationCurve}`
     this.content.innerHTML = ''
     // Crea un DocumentFragment para todos los contenedores
     const fragmentLettersContainer = document.createDocumentFragment()
-    for (let i = 0; i < (words[0]?.length || 0); i++) {
+    for (let i = 0; i < longestLength; i++) {
       if (lettersContainer[cacheKey]) {
         this.content.appendChild(lettersContainer[cacheKey].cloneNode(true))
         continue

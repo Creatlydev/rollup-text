@@ -9,7 +9,7 @@ const loaded = (function () {
 })()
 
 const lettersContainer = {}
-const availableLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+const availableLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_!¡¿?|'
 const cachedTransformations = new Map() // Cache global compartido por todas las instancias
 
 export class RollupText extends HTMLElement {
@@ -30,8 +30,9 @@ export class RollupText extends HTMLElement {
         flex-direction: column;
         transition: transform var(--duration) var(--time-function);
       }
-      span {
+      .letter {
         height: 1em;
+        background: transparent;
       }
     `
 
@@ -267,6 +268,7 @@ export class RollupText extends HTMLElement {
       container.classList.add('letters')
       this.transformedLetters.split('').forEach((letter) => {
         const span = document.createElement('span')
+        span.classList.add('letter')
         span.textContent = letter
         fragmentContainer.appendChild(span)
       })
@@ -276,10 +278,16 @@ export class RollupText extends HTMLElement {
         const prefixLetters = ['Z', 'Y', 'X', 'W']
         const suffixLetters = ['A', 'B', 'C', 'D']
         prefixLetters.forEach((letter) => {
-          container.insertAdjacentHTML('afterbegin', `<span>${letter}</span>`)
+          container.insertAdjacentHTML(
+            'afterbegin',
+            `<span class="letter">${letter}</span>`
+          )
         })
         suffixLetters.forEach((letter) => {
-          container.insertAdjacentHTML('beforeend', `<span>${letter}</span>`)
+          container.insertAdjacentHTML(
+            'beforeend',
+            `<span class="letter">${letter}</span>`
+          )
         })
 
         container.style.transform = 'translateY(-4em)'

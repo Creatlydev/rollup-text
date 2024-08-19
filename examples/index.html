@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rollup Text Component</title>
+    <title>Rollup Text </title>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;800&family=Oswald:wght@700&display=swap">
 
@@ -13,50 +13,78 @@
 
 <body>
 
+    <header class="header">
+        <rollup-text class="header-rollup" words='["HELLO!", "I_AM", "SAMIR", "YANGUA", "RUIZ", "FRONTEND", "AND", "BACKEND", "DEVELOPER"]' word-interval="2000"
+            scroll-speed="1000" animation-curve="linear">
+        </rollup-text>
+    </header>
+
     <div class="container">
-        <rollup-text class="component rollup" words='["DESIGN", "Visual", "colors"]' text-case="uppercase"
-            word-interval="2000" scroll-speed="1000" animation-curve="bezier">
-        </rollup-text>
-
-        <rollup-text class="component rollup" words='["FRAMER", "SKETCH", "ADOBEX"]' text-case="uppercase"
-            word-interval="1000" scroll-speed="3500" animation-curve="linear" distance-based-scroll>
-        </rollup-text>
-
-        <rollup-text class="component rollup rollup-2" words='["Design", "Layout", "Visual", "Colors"]'
-            text-case="uppercase" word-interval="2000" scroll-speed="3000" animation-curve="bezier"
-            distance-based-scroll>
-        </rollup-text>
-
-        <rollup-text class="component rollup rollup-2" words='["Design", "Layout", "Visual", "Colors"]'
-            word-interval="3000" animation-curve="linear">
-        </rollup-text>
-
-        <rollup-text class="component rollup rollup-1" words='["REACT", "VUEJS", "BUNJS"]' text-case="uppercase"
-            word-interval="1500" scroll-speed="2000" animation-curve="linear" distance-based-scroll>
-        </rollup-text>
-
-        <rollup-text class="component rollup rollup-2" words='["STYLES", "XUSERS", "EMAILS"]' text-case="uppercase"
-            word-interval="2000" scroll-speed="2500" animation-curve="bezier">
-        </rollup-text>
-
-        <rollup-text class="component rollup rollup-3" words='["NODEJS", "PYTHON", "SWIFTX"]' text-case="uppercase"
-            word-interval="2500" scroll-speed="3000" animation-curve="linear" distance-based-scroll>
-        </rollup-text>
-
-        <rollup-text class="component rollup rollup-4" words='["GRIDS", "ICONS", "STYLE"]' text-case="uppercase"
-            word-interval="1000" scroll-speed="1500" animation-curve="bezier">
-        </rollup-text>
-
-        <rollup-text class="component rollup rollup-5" words='["TOOLS", "GITMS", "NPMJS"]' text-case="uppercase"
-            word-interval="2000" scroll-speed="3500" animation-curve="linear" distance-based-scroll>
-        </rollup-text>
-
-        <rollup-text class="component rollup rollup-6" words='["HTMX", "NODE", "NEXT"]' text-case="uppercase"
-            word-interval="2000" scroll-speed="2500" animation-curve="bezier">
-        </rollup-text>
+        <div class="component">
+            <rollup-text class="rollup" words='["SAMIR", "YANGUA", "RUIZ"]' text-case="uppercase" word-interval="2000"
+                scroll-speed="1000" animation-curve="bezier">
+            </rollup-text>
+        </div>
+        <div class="component">
+            <rollup-text class="rollup" words='["FRONTEND", "DEVELOPERS", "UX"]' text-case="uppercase"
+                word-interval="2000" scroll-speed="700" animation-curve="bezier" distance-based-scroll>
+            </rollup-text>
+        </div>
+        <div class="component">
+            <rollup-text class="rollup" words='["UX", "UI", "FIGMA"]' text-case="uppercase" word-interval="2000"
+                scroll-speed="1000" animation-curve="linear">
+            </rollup-text>
+        </div>
+        <div class="component">
+            <rollup-text class="rollup" words='["JAVASCRIPT", "HTML", "CSS"]' text-case="uppercase" word-interval="2000"
+                scroll-speed="1000" animation-curve="linear">
+            </rollup-text>
+        </div>
 
 
+        <div class="component">
+            <rollup-text class="rollup" words='["FRAMER", "SKETCH", "ADOBE"]' text-case="uppercase"
+                word-interval="1000" scroll-speed="3500" animation-curve="linear" distance-based-scroll>
+            </rollup-text>
+        </div>
+
+        <div class="component">
+            <rollup-text class="rollup rollup-2" words='["Design", "Layout", "Visual", "Colors"]' text-case="uppercase"
+                word-interval="2000" scroll-speed="3000" animation-curve="bezier" distance-based-scroll>
+            </rollup-text>
+        </div>
+
+        <div class="component">
+            <rollup-text class="rollup rollup-1" words='["REACT", "VUEJS", "BUNJS"]' text-case="uppercase"
+                word-interval="1500" scroll-speed="2000" animation-curve="linear" distance-based-scroll>
+            </rollup-text>
+        </div>
+
+        <div class="component">
+            <rollup-text class="rollup rollup-3" words='["NODEJS", "PYTHON", "SWIFTX"]' text-case="uppercase"
+                word-interval="2500" scroll-speed="3000" animation-curve="linear" distance-based-scroll>
+            </rollup-text>
+        </div>
+
+        <div class="component">
+            <rollup-text class="rollup rollup-4" words='["GRIDS", "ICONS", "STYLE"]' text-case="uppercase"
+                word-interval="1000" scroll-speed="1500" animation-curve="bezier">
+            </rollup-text>
+        </div>
+
+        <div class="component">
+            <rollup-text class="rollup rollup-5" words='["TOOLS", "GITMS", "NPMJS"]' text-case="uppercase"
+                word-interval="2000" scroll-speed="3500" animation-curve="linear" distance-based-scroll>
+            </rollup-text>
+        </div>
+
+        <div class="component">
+            <rollup-text class="rollup rollup-6" words='["CSS3", "HTML5", "ES6"]'
+                text-case="uppercase" word-interval="2000" scroll-speed="3000" distance-based-scroll>
+            </rollup-text>
+        </div>
     </div>
+
     <section class="hero">
         <h1>
             CSS is
@@ -67,12 +95,12 @@
 
 
         <p>
-            RollupText es un web component que te permite animar texto de una manera
+            RollupText es un web que te permite animar texto de una manera
             <rollup-text class="rollup" words='["DINAMICAS", "ATRACTIVA"]' text-case="uppercase" word-interval="2000"
                 scroll-speed="2500" animation-curve="linear" distance-based-scroll>
             </rollup-text>
             en tu sitio web.
-            Este componente es perfecto para destacar términos importantes, slogans, o simplemente agregar un toque de
+            Este es perfecto para destacar términos importantes, slogans, o simplemente agregar un toque de
             estilo a tus
             páginas.
         </p>

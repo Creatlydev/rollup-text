@@ -12,9 +12,22 @@ body {
     font-family: 'Space Grotesk';
 }
 
+.header {
+    margin-block: 3rem;
+    text-align: center;
+    font-size: clamp(1rem, 8vw, 4rem);
+    font-weight: 700;
+    color: #f0881f;
+    font-family: 'Space Grotesk';
+}
+
+.header-rollup {
+    border-bottom: 4px solid;
+}
+
 .container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
     gap: 2rem;
 }
 
@@ -27,20 +40,17 @@ body {
 }
 
 
-/* TYPING EFFECT ELEMENT */
-
-
-
-
 
 /* ROLLUP TEXT */
 .rollup {
-    border: 1px solid #09f;
+    width: 100%;
     color: #09f;
     font-weight: 800;
     font-size: clamp(1.5rem, 8vw, 2.5rem);
-    --letter-spacing: 0px;
-    --border: 2px solid;
+}
+
+.rollup span {
+    border: 2px solid;
 }
 
 .rollup-2 {
@@ -52,35 +62,24 @@ body {
 
 /* Rollup 3 */
 .rollup-3 {
-    --letter-spacing: 20px;
-    --padding: 0 4px;
-    --border: 1px solid #3be43e;
     color: #3be43e;
 }
 
 /* Rollup 4 */
 .rollup-4 {
-    --w-letter: 1ch;
-    --border: none;
     color: #ffbb77;
 }
 
 /* Rollup 5 */
 .rollup-5 {
-    --border: none;
     color: #9519e3;
 }
 
 /* Rollup 6 */
 .rollup-6 {
-    --letter-spacing: 18px;
-    --w-letter: 1em;
-    /* Padding solo en el eje X */
-    --border: 2px solid #ff6f91;
-    /* Rosa brillante */
     color: #ff6f91;
-    /* Rosa brillante */
 }
+
 
 
 /* HERO */
@@ -96,17 +95,19 @@ body {
 }
 
 .hero .rollup {
-    border: none;
-    --border: none;
     font-size: 1rem;
+    width: auto;
+}
+
+.hero .rollup span {
+    border: none;
 }
 
 .hero .rollup:nth-child(2) {
     color: limegreen;
-    --w-letter: 1ch;
 }
 
-.hero p {
+.hero>p {
     margin-top: 1rem;
 }
 

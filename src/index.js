@@ -9,12 +9,22 @@ const loaded = (function () {
 })()
 
 const lettersContainer = {}
-const availableLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_!¡¿?|'
-const cachedTransformations = new Map() // Cache global compartido por todas las instancias
+let availableLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-!¡¿?|'
 
 export class RollupText extends HTMLElement {
+  // Método estático para configurar las letras disponibles
+  static configure({ letters }) {
+    if (typeof letters !== 'string' || !letters.length) {
+      throw new Error(
+        'Invalid value for available letters. It should be a non-empty string.'
+      )
+    }
+    availableLetters = letters
+  }
+
   constructor() {
     super()
+    this.cachedTransformations = new Map()
     const style = `
       rollup-text {
         --duration: var(--scroll-speed);
@@ -46,21 +56,21 @@ export class RollupText extends HTMLElement {
     }
   }
 
-  getCachedOrComputePosition(fromLetter, toLetter, transformedLetters) {
+  _getCachedOrComputePosition(fromLetter, toLetter) {
+    if (!toLetter) return { targetPos: null, adjustedDuration: null }
+    fromLetter = fromLetter.toUpperCase()
+    toLetter = toLetter.toUpperCase()
     const cacheKey = `${fromLetter}-${toLetter}-${this.animationCurve}`
-    if (cachedTransformations.has(cacheKey)) {
-      return cachedTransformations.get(cacheKey)
+    if (this.cachedTransformations.has(cacheKey)) {
+      return this.cachedTransformations.get(cacheKey)
     }
-    const fromPos = transformedLetters.indexOf(fromLetter)
-    let toPos = transformedLetters.indexOf(toLetter)
+
+    availableLetters = availableLetters.toUpperCase()
+    const fromPos = availableLetters.indexOf(fromLetter)
+    let toPos = availableLetters.indexOf(toLetter)
 
     // Cálculo de la duración ajustada
-    let adjustedDuration = null
-    if (this.distanceBasedScroll) {
-      const distance = Math.abs(toPos - fromPos)
-      const baseSpeed = parseInt(this.scrollSpeed)
-      adjustedDuration = (baseSpeed / transformedLetters.length) * distance
-    }
+    let adjustedDuration = this._adjustDuration(toPos, fromPos)
 
     if (this.animationCurve === 'bezier') {
       toPos += 4 // Ajuste para la animación bezier
@@ -68,8 +78,19 @@ export class RollupText extends HTMLElement {
 
     // Guardamos tanto la posición como la duración ajustada en el cache global
     const transformationData = { targetPos: toPos, adjustedDuration }
-    cachedTransformations.set(cacheKey, transformationData)
+    this.cachedTransformations.set(cacheKey, transformationData)
     return transformationData
+  }
+
+  _adjustDuration(toPos, fromPos) {
+    // Cálculo de la duración ajustada
+    let adjustedDuration = null
+    if (this.distanceBasedScroll) {
+      const distance = Math.abs(toPos - fromPos)
+      const baseSpeed = parseInt(this.scrollSpeed)
+      adjustedDuration = (baseSpeed / availableLetters.length) * distance
+    }
+    return adjustedDuration
   }
 
   async connectedCallback() {
@@ -191,12 +212,7 @@ export class RollupText extends HTMLElement {
       : []
     const longestLength = Math.max(...words?.map((word) => word.length)) || 0
 
-    const transformText = (type) =>
-      type === 'lowercase'
-        ? availableLetters.toLowerCase()
-        : availableLetters.toUpperCase()
-
-    this.createLetterContainers(longestLength)
+    this._createLetterContainers(longestLength)
 
     const animateLetters = (index = words.length - 1) => {
       if (!words.length || (words.length < 2 && index === 1)) return
@@ -206,13 +222,8 @@ export class RollupText extends HTMLElement {
 
       currentWord?.split('').forEach((letter, i) => {
         const targetLetter = nextWord[i]
-        const { targetPos, adjustedDuration } = this.getCachedOrComputePosition(
-          letter,
-          targetLetter,
-          this.transformedLetters,
-          this.animationCurve
-        )
-
+        const { targetPos, adjustedDuration } =
+          this._getCachedOrComputePosition(letter, targetLetter)
         const letterElement = this.querySelector(`.letters:nth-child(${i + 1})`)
 
         if (adjustedDuration) {
@@ -220,7 +231,12 @@ export class RollupText extends HTMLElement {
         }
         letterElement.style.transform = `translateY(-${targetPos}em)`
 
-        this.handleWordsVariableLengths(i, currentWord, nextWord, longestLength)
+        this._handleWordsVariableLengths(
+          i,
+          currentWord,
+          nextWord,
+          longestLength
+        )
       })
 
       requestAnimationFrame(() =>
@@ -230,7 +246,7 @@ export class RollupText extends HTMLElement {
     animateLetters()
   }
 
-  handleWordsVariableLengths(i, currentWord, nextWord, longestLength) {
+  _handleWordsVariableLengths(i, currentWord, nextWord, longestLength) {
     // Handle extra letters for the next word
     if (nextWord[currentWord.length]) {
       for (let i = currentWord.length; i < nextWord.length; i++) {
@@ -246,13 +262,14 @@ export class RollupText extends HTMLElement {
       const extraLetters = this.querySelectorAll(
         `.letters:nth-child(n+${nextWord.length + 1})`
       )
-      extraLetters.forEach(
-        (extraLetter) => (extraLetter.style.transform = 'translateY(100%)')
-      )
+      extraLetters.forEach((extraLetter) => {
+        extraLetter.style.transitionDuration = '200ms'
+        extraLetter.style.transform = 'translateY(100%)'
+      })
     }
   }
 
-  createLetterContainers(longestLength) {
+  _createLetterContainers(longestLength) {
     const cacheKey = `${this.textCase}-${this.animationCurve}`
     this.innerHTML = ''
     // Crea un DocumentFragment para todos los contenedores

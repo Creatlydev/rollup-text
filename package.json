@@ -1,6 +1,6 @@
 {
   "name": "rollup-text",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "A customizable web component that animates text with smooth roll-up effects using CSS and JavaScript.",
   "main": "index.js",
   "files": [
